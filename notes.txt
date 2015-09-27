@@ -1,4 +1,36 @@
+Assumptions:
+  A year value is defined as a non-negative integer
+  Assuming that for track we only consider it containing a year based of name,
+    not it's run time
+
 1. What are the 5 most expensive items from each category?
+  Step 1: sort data into buckets for each category(group_by)
+  Step 2: find the 5 most expensive items from each category
+    Find max per category, remove it from group, do this 4 more times
+    -Use enumerable max with arg of 5, may need to implement <=> or pass a block to define
+     what I mean by max
 2. Which cds have a total running time longer than 60 minutes?
+  Step 1: Find all objects of types cds (group by)
+  Step 2: find those that have running time longer than 60 minutes(select)
 3. Which authors have also released cds?
+  Step 1:  Find all objects of types cd(group_by)
+  Step 2:  Find all objects of type book(group_by)
+  Step 3: Take the smaller of the two, and
+    for element1 in array1
+      for element2 in array 2
+        if element1.author == element2.artist
+          add to array
+    This will run in O(n^2) time, if I have more time try to find a
+    more effecient algorithim, considering in some cases we could have
+    100mbs of data.
+
+    I think this is select, but across two collections.
+    Would be really nice if I could modify array intersection(&)....
 4. Which items have a title, track, or chapter that contains a year.
+    Iterate over each inventory item
+    If type of dvd
+      Check title for year value
+    If type of cd
+      Check title for year value
+      Check each track for year value
+
