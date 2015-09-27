@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'json'
 require 'pry'
 
 class InventoryManager
@@ -9,8 +8,8 @@ class InventoryManager
     @data = inventory_items
   end
 
-  def say_hello
-    "Hello"
+  def grouped_data(group_on)
+    data.group_by { |inventory_items| inventory_items[group_on] }
   end
 
   private
@@ -18,14 +17,17 @@ class InventoryManager
 end
 
 describe InventoryManager do
+  let (:type_variable) { "type"}
+  let (:item_types) { ["book", "dvd", "cd"]}
+
 
   before(:each) do
     @inventory_manager = InventoryManager.new(test_data)
   end
 
-  describe "#say_hello" do
-    it "returns hello" do
-      expect(@inventory_manager.say_hello).to match "Hello"
+  describe "#grouped_data" do
+    it "groups the data according to the item type" do
+      expect(@inventory_manager.grouped_data(type_variable).keys).to eq item_types
     end
   end
 
