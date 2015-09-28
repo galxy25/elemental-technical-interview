@@ -34,6 +34,16 @@ class InventoryManager
     book_authors & cd_authors
   end
 
+  def chronic_descriptions
+    result = [ ]
+    books = items_by_category("book")
+    cds = items_by_category("cd")
+    dvds = items_by_category("dvd")
+    result << dvds.select { |dvd| chronic_dvd?(dvd)}
+    result << cds.select { |cd| chronic_cd?(cd)}
+    result << books.select { |book| chronic_book?(book)}
+  end
+
   private
 
   def price_comparasion_field
@@ -69,6 +79,26 @@ class InventoryManager
     end
     length_in_seconds / 60
   end
+
+  def chronic_book?(book)
+    string_has_year_value?(book["title"]) || book["chapters"].any? do |chapter|
+      string_has_year_value?(chapter)
+    end
+  end
+
+  def chronic_cd?(cd)
+    string_has_year_value?(cd["title"]) || cd["tracks"].any? do |track|
+      string_has_year_value?(track["name"])
+    end
+  end
+
+  def chronic_dvd?(dvd)
+    string_has_year_value?(dvd["title"])
+  end
+
+  def string_has_year_value?(string)
+    !!/\d+/.match(string)
+  end
 end
 
 describe InventoryManager do
@@ -76,15 +106,70 @@ describe InventoryManager do
   let (:expensive_book_authors) { ["mary", "had", "a", "little", "lamb"] }
   let (:cheap_book_author) { "joseph" }
   let (:expensive_cd_artists) { [ "drake", "juan", "john"] }
-  let (:expensive_dvd_titles) { ["An", "Affair", "To", "Remember"] }
+  let (:expensive_dvd_titles) { ["2001: An", "Affair", "To", "Remember"] }
   let (:limit) { 5 }
-  let(:epic_cd_minute_length) { 60 }
-  let(:long_winded_artists) { [ "juan", "john" ] }
-  let(:short_winded_artist) { "joan" }
-  let(:prolific_producer) { "joseph"}
+  let (:epic_cd_minute_length) { 60 }
+  let (:long_winded_artists) { [ "juan", "john" ] }
+  let (:short_winded_artist) { "joan" }
+  let (:prolific_producer) { "joseph"}
+  let (:chronic_album) {
+    {
+      "price"=>17.99,
+      "tracks"=> [
+        {
+          "seconds"=>1800,
+          "name"=>"2015"
+        },
+        {
+          "seconds"=>2800,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"1989",
+      "author"=>"john",
+      "type"=>"cd"
+    }
+  }
+  let (:chronic_book) {
+    {
+      "price"=>13.99,
+      "chapters"=> [
+        "one",
+        "two",
+        "three"],
+      "year"=>1999,
+      "title"=>"1984",
+      "author"=>"a",
+      "type"=>"book"
+    }
+  }
+  let (:chronic_dvd) {
+    {
+      "price"=>11.99,
+      "minutes"=>90,
+      "year"=>2004,
+      "title"=>"2001: An",
+      "director"=>"alan",
+      "type"=>"dvd"
+    }
+  }
+
+  let (:chronic_items) { [chronic_dvd, chronic_book, chronic_album]}
 
   before(:each) do
     @inventory_manager = InventoryManager.new(test_data)
+  end
+
+  describe "#chronic descriptions" do
+    before do
+      @timely_items = @inventory_manager.chronic_descriptions
+    end
+    it "returns all items with a title, track, or chapter containing a year value" do
+      chronic_items.each do |chronic_item|
+        expect(@timely_items.any? { |timely_item| timely_item[0] == chronic_item }).to equal true
+      end
+    end
   end
 
   describe "#potential_egots"do
@@ -181,7 +266,7 @@ def test_data
         "two",
         "three"],
       "year"=>1999,
-      "title"=>"foo",
+      "title"=>"1984",
       "author"=>"a",
       "type"=>"book"
     },
@@ -222,7 +307,7 @@ def test_data
       "price"=>11.99,
       "minutes"=>90,
       "year"=>2004,
-      "title"=>"An",
+      "title"=>"2001: An",
       "director"=>"alan",
       "type"=>"dvd"
     },
@@ -306,7 +391,7 @@ def test_data
       "tracks"=> [
         {
           "seconds"=>1800,
-          "name"=>"one"
+          "name"=>"2015"
         },
         {
           "seconds"=>2800,
@@ -314,7 +399,7 @@ def test_data
         }
       ],
       "year"=>2000,
-      "title"=>"baz",
+      "title"=>"1989",
       "author"=>"john",
       "type"=>"cd"
     },

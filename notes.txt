@@ -35,3 +35,6 @@ Assumptions:
       Check title for year value
       Check each track for year value
 
+    Assuming here that these are the only three cases we need to worry about-i.e., even if there is another type of item
+    I'm not expected to be able to write a method(or implement method_missing) to check all the fields for a year value
+
