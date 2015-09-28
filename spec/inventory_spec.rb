@@ -18,7 +18,25 @@ class InventoryManager
       result
   end
 
+  def epic_length_cds(minute_length)
+    result = []
+    cds = items_by_category("cd")
+    cds.each do |cd|
+      result << cd if cd_length_in_minutes(cd) > minute_length
+    end
+
+    result
+  end
+
   private
+
+  def price_comparasion_field
+    "price"
+  end
+
+  def default_group_field
+    "type"
+  end
 
   def grouped_data(group_on)
     data.group_by { |inventory_items| inventory_items[group_on] }
@@ -34,12 +52,16 @@ class InventoryManager
     end
   end
 
-  def price_comparasion_field
-    "price"
+  def cds
+    items_by_category("cd")
   end
 
-  def default_group_field
-    "type"
+  def cd_length_in_minutes(cd)
+    length_in_seconds = 0
+    cd["tracks"].each do |track|
+      length_in_seconds = length_in_seconds + track["seconds"]
+    end
+    length_in_seconds / 60
   end
 end
 
@@ -47,17 +69,36 @@ describe InventoryManager do
   let (:item_types) { ["book", "dvd", "cd"] }
   let (:expensive_book_authors) { ["mary", "had", "a", "little", "lamb"] }
   let (:cheap_book_author) { "joseph" }
-  let (:expensive_cd_artists) { [ "joan"] }
+  let (:expensive_cd_artists) { [ "joan", "juan", "john"] }
   let (:expensive_dvd_titles) { ["An", "Affair", "To", "Remember"] }
   let (:limit) { 5 }
-
+  let(:epic_cd_minute_length) { 60 }
+  let(:long_winded_artists) { [ "juan", "john" ] }
+  let(:short_winded_artist) { "joan" }
 
   before(:each) do
     @inventory_manager = InventoryManager.new(test_data)
   end
 
-  describe "most_expensive" do
-    before do
+  describe "#epic_length_cds" do
+    before(:each) do
+      @long_running_cds = @inventory_manager.epic_length_cds(epic_cd_minute_length)
+      @long_running_cds_artist = @long_running_cds.flat_map { |cd| cd["author"] }
+    end
+
+    it "returns all cd's that have a running time greater than a specified time" do
+      long_winded_artists.each do |artist|
+        expect(@long_running_cds_artist).to include artist
+      end
+    end
+
+    it "does not return cds with running time less than the specified time" do
+      expect(@long_running_cds_artist).to_not include short_winded_artist
+    end
+  end
+
+  describe "#most_expensive" do
+    before(:each) do
       @most_expensive_items = @inventory_manager.most_expensive_by_category(limit)
       @most_expensive_creators = @most_expensive_items.flat_map do |expensive_items|
         #Obviously this is hard coded to the particular data types I have in
@@ -206,11 +247,45 @@ def test_data
         {
           "seconds"=>200,
           "name"=>"two"
-          }
-        ],
+        }
+      ],
       "year"=>2000,
       "title"=>"baz",
       "author"=>"joan",
+      "type"=>"cd"
+    },
+    {
+      "price"=>15.99,
+      "tracks"=> [
+        {
+          "seconds"=>1900,
+          "name"=>"one"
+        },
+        {
+          "seconds"=>1800,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"baz",
+      "author"=>"juan",
+      "type"=>"cd"
+    },
+    {
+      "price"=>15.99,
+      "tracks"=> [
+        {
+          "seconds"=>1800,
+          "name"=>"one"
+        },
+        {
+          "seconds"=>2800,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"baz",
+      "author"=>"john",
       "type"=>"cd"
     }
   ]
