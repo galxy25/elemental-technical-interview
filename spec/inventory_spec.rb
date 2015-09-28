@@ -35,7 +35,7 @@ class InventoryManager
   end
 
   def chronic_descriptions
-    result = [ ]
+    result = []
     books = items_by_category("book")
     cds = items_by_category("cd")
     dvds = items_by_category("dvd")
@@ -165,11 +165,13 @@ describe InventoryManager do
     before do
       @timely_items = @inventory_manager.chronic_descriptions
     end
+
     it "returns all items with a title, track, or chapter containing a year value" do
       chronic_items.each do |chronic_item|
         expect(@timely_items.any? { |timely_item| timely_item[0] == chronic_item }).to equal true
       end
     end
+
   end
 
   describe "#potential_egots"do
