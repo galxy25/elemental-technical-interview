@@ -28,6 +28,12 @@ class InventoryManager
     result
   end
 
+  def potential_egots
+    book_authors = items_by_category("book").flat_map {|book| book["author"]}
+    cd_authors = items_by_category("cd").flat_map {|cd| cd["author"]}
+    book_authors & cd_authors
+  end
+
   private
 
   def price_comparasion_field
@@ -69,15 +75,22 @@ describe InventoryManager do
   let (:item_types) { ["book", "dvd", "cd"] }
   let (:expensive_book_authors) { ["mary", "had", "a", "little", "lamb"] }
   let (:cheap_book_author) { "joseph" }
-  let (:expensive_cd_artists) { [ "joan", "juan", "john"] }
+  let (:expensive_cd_artists) { [ "drake", "juan", "john"] }
   let (:expensive_dvd_titles) { ["An", "Affair", "To", "Remember"] }
   let (:limit) { 5 }
   let(:epic_cd_minute_length) { 60 }
   let(:long_winded_artists) { [ "juan", "john" ] }
   let(:short_winded_artist) { "joan" }
+  let(:prolific_producer) { "joseph"}
 
   before(:each) do
     @inventory_manager = InventoryManager.new(test_data)
+  end
+
+  describe "#potential_egots"do
+    it "returns the authors who have released cd's as well" do
+      expect(@inventory_manager.potential_egots).to eq [prolific_producer]
+    end
   end
 
   describe "#epic_length_cds" do
@@ -258,6 +271,23 @@ def test_data
       "price"=>15.99,
       "tracks"=> [
         {
+          "seconds"=>180,
+          "name"=>"one"
+        },
+        {
+          "seconds"=>200,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"baz",
+      "author"=>"joseph",
+      "type"=>"cd"
+    },
+    {
+      "price"=>16.99,
+      "tracks"=> [
+        {
           "seconds"=>1900,
           "name"=>"one"
         },
@@ -272,7 +302,7 @@ def test_data
       "type"=>"cd"
     },
     {
-      "price"=>15.99,
+      "price"=>17.99,
       "tracks"=> [
         {
           "seconds"=>1800,
@@ -286,6 +316,57 @@ def test_data
       "year"=>2000,
       "title"=>"baz",
       "author"=>"john",
+      "type"=>"cd"
+    },
+    {
+      "price"=>18.99,
+      "tracks"=> [
+        {
+          "seconds"=>1800,
+          "name"=>"one"
+        },
+        {
+          "seconds"=>2800,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"If you're reading this",
+      "author"=>"john",
+      "type"=>"cd"
+    },
+    {
+      "price"=>19.99,
+      "tracks"=> [
+        {
+          "seconds"=>1800,
+          "name"=>"one"
+        },
+        {
+          "seconds"=>2800,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"It's too late",
+      "author"=>"john",
+      "type"=>"cd"
+    },
+    {
+      "price"=>20.99,
+      "tracks"=> [
+        {
+          "seconds"=>1800,
+          "name"=>"one"
+        },
+        {
+          "seconds"=>2800,
+          "name"=>"two"
+        }
+      ],
+      "year"=>2000,
+      "title"=>"Nothing was the same",
+      "author"=>"drake",
       "type"=>"cd"
     }
   ]
