@@ -47,6 +47,61 @@ def test_data
       "type"=>"book"
     },
     {
+      "price"=>14.99,
+      "chapters"=> [
+        "one",
+        "two",
+        "three"],
+      "year"=>1999,
+      "title"=>"foo",
+      "author"=>"had",
+      "type"=>"book"
+    },
+    {
+      "price"=>13.99,
+      "chapters"=> [
+        "one",
+        "two",
+        "three"],
+      "year"=>1999,
+      "title"=>"foo",
+      "author"=>"a",
+      "type"=>"book"
+    },
+    {
+      "price"=>12.99,
+      "chapters"=> [
+        "one",
+        "two",
+        "three"],
+      "year"=>1999,
+      "title"=>"foo",
+      "author"=>"little",
+      "type"=>"book"
+    },
+    {
+      "price"=>11.99,
+      "chapters"=> [
+        "one",
+        "two",
+        "three"],
+      "year"=>1999,
+      "title"=>"foo",
+      "author"=>"lamb",
+      "type"=>"book"
+    },
+    {
+      "price"=>10.99,
+      "chapters"=> [
+        "one",
+        "two",
+        "three"],
+      "year"=>1999,
+      "title"=>"foo",
+      "author"=>"joseph",
+      "type"=>"book"
+    },
+    {
       "price"=>11.99,
       "minutes"=>90,
       "year"=>2004,

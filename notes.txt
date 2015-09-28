@@ -1,4 +1,5 @@
 Assumptions:
+  Running most current ruby major/minor version (>= 2.2.0)
   A year value is defined as a non-negative integer
   Assuming that for track we only consider it containing a year based of name,
     not it's run time
