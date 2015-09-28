@@ -8,12 +8,24 @@ class InventoryManager
     @data = inventory_items
   end
 
+  def most_expensive_by_category(limit)
+      result = []
+      grouped_data(default_group_field).each do |group|
+        #The first element of group is the item type,
+        #The second element is the array of actual items
+        result << most_expensive(limit, group[1])
+      end
+      result
+  end
+
+  private
+
   def grouped_data(group_on)
     data.group_by { |inventory_items| inventory_items[group_on] }
   end
 
   def items_by_category(category)
-    grouped_data("type")[category]
+    grouped_data(default_group_field)[category]
   end
 
   def most_expensive(limit, item_group)
@@ -22,40 +34,64 @@ class InventoryManager
     end
   end
 
-  private
-
   def price_comparasion_field
     "price"
+  end
+
+  def default_group_field
+    "type"
   end
 end
 
 describe InventoryManager do
-  let (:type_variable) { "type"}
-  let (:item_types) { ["book", "dvd", "cd"]}
-  let (:expensive_book_authors) { ["mary", "had", "a", "little", "lamb"]}
+  let (:item_types) { ["book", "dvd", "cd"] }
+  let (:expensive_book_authors) { ["mary", "had", "a", "little", "lamb"] }
+  let (:cheap_book_author) { "joseph" }
+  let (:expensive_cd_artists) { [ "joan"] }
+  let (:expensive_dvd_titles) { ["An", "Affair", "To", "Remember"] }
+  let (:limit) { 5 }
 
 
   before(:each) do
     @inventory_manager = InventoryManager.new(test_data)
   end
 
-  describe "#grouped_data" do
-    it "groups the data according to the item type" do
-      expect(@inventory_manager.grouped_data(type_variable).keys).to eq item_types
-    end
-  end
-
   describe "most_expensive" do
-    context "when searching just by the book category" do
-      before do
-        @most_expensive_books = @inventory_manager.most_expensive(5, @inventory_manager.items_by_category("book"))
-        @book_authors = @most_expensive_books.flat_map { |book| book["author"] }
-      end
-
-      it "returns the top 5 expensive books" do
-        expect(@book_authors).to eq expensive_book_authors
+    before do
+      @most_expensive_items = @inventory_manager.most_expensive_by_category(limit)
+      @most_expensive_creators = @most_expensive_items.flat_map do |expensive_items|
+        #Obviously this is hard coded to the particular data types I have in
+        #the test data sample
+        expensive_items.flat_map do |expensive_item|
+          if expensive_item["type"] == "cd"
+            expensive_item["author"]
+          elsif expensive_item["type"] == "dvd"
+            expensive_item["title"]
+          else
+            expensive_item["author"]
+          end
+        end
       end
     end
+
+    it "returns up to the specified number of most expensive items per category" do
+      expensive_dvd_titles.each do | title|
+       expect(@most_expensive_creators).to include title
+      end
+
+      expensive_cd_artists.each do | artitst|
+       expect(@most_expensive_creators).to include artitst
+      end
+
+      expensive_book_authors.each do | author|
+       expect(@most_expensive_creators).to include author
+      end
+    end
+
+    it "does not include a non top 5 expensive item" do
+      expect(@most_expensive_creators).to_not include cheap_book_author
+    end
+
   end
 
 end
@@ -132,9 +168,34 @@ def test_data
       "price"=>11.99,
       "minutes"=>90,
       "year"=>2004,
-      "title"=>"bar",
+      "title"=>"An",
       "director"=>"alan",
-      "type"=>"dvd"},
+      "type"=>"dvd"
+    },
+    {
+      "price"=>11.99,
+      "minutes"=>90,
+      "year"=>2004,
+      "title"=>"Affair",
+      "director"=>"alan",
+      "type"=>"dvd"
+    },
+    {
+      "price"=>11.99,
+      "minutes"=>90,
+      "year"=>2004,
+      "title"=>"To",
+      "director"=>"alan",
+      "type"=>"dvd"
+    },
+    {
+      "price"=>11.99,
+      "minutes"=>90,
+      "year"=>2004,
+      "title"=>"Remember",
+      "director"=>"alan",
+      "type"=>"dvd"
+    },
     {
       "price"=>15.99,
       "tracks"=> [
