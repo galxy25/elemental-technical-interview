@@ -12,13 +12,27 @@ class InventoryManager
     data.group_by { |inventory_items| inventory_items[group_on] }
   end
 
+  def items_by_category(category)
+    grouped_data("type")[category]
+  end
+
+  def most_expensive(limit, item_group)
+    item_group.max(limit) do |item1, item2|
+      item1[price_comparasion_field] <=> item2[price_comparasion_field]
+    end
+  end
+
   private
 
+  def price_comparasion_field
+    "price"
+  end
 end
 
 describe InventoryManager do
   let (:type_variable) { "type"}
   let (:item_types) { ["book", "dvd", "cd"]}
+  let (:expensive_book_authors) { ["mary", "had", "a", "little", "lamb"]}
 
 
   before(:each) do
@@ -28,6 +42,19 @@ describe InventoryManager do
   describe "#grouped_data" do
     it "groups the data according to the item type" do
       expect(@inventory_manager.grouped_data(type_variable).keys).to eq item_types
+    end
+  end
+
+  describe "most_expensive" do
+    context "when searching just by the book category" do
+      before do
+        @most_expensive_books = @inventory_manager.most_expensive(5, @inventory_manager.items_by_category("book"))
+        @book_authors = @most_expensive_books.flat_map { |book| book["author"] }
+      end
+
+      it "returns the top 5 expensive books" do
+        expect(@book_authors).to eq expensive_book_authors
+      end
     end
   end
 
